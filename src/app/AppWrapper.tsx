@@ -3,6 +3,7 @@
 import { SolanaAdapter } from "@reown/appkit-adapter-solana/react";
 import { solana, solanaDevnet, solanaTestnet } from "@reown/appkit/networks";
 import { createAppKit } from "@reown/appkit/react";
+import { WalletProvider } from "@solana/wallet-adapter-react";
 import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
@@ -36,7 +37,11 @@ createAppKit({
 });
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
-  return <div>{children}</div>;
+  return (
+    <WalletProvider wallets={solanaWeb3JsAdapter.wallets || []}>
+      {children}
+    </WalletProvider>
+  );
 };
 
 export default AppLayout;

@@ -1,0 +1,95 @@
+{
+  "address": "F5jE4FMaARnKG79qLMtaGmhNHjb1LM9s2Bo3wH6QYZRK",
+  "metadata": {
+    "name": "sendacoin",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "process_order",
+      "discriminator": [
+        126,
+        54,
+        252,
+        181,
+        254,
+        163,
+        107,
+        165
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "payer_token_account",
+          "writable": true
+        },
+        {
+          "name": "merchant_token_account",
+          "writable": true
+        },
+        {
+          "name": "fee_account",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "_order_id",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "verify_payment",
+      "discriminator": [
+        70,
+        155,
+        98,
+        44,
+        176,
+        110,
+        74,
+        169
+      ],
+      "accounts": [
+        {
+          "name": "merchant_token_account",
+          "docs": [
+            "The merchant's token account to verify"
+          ]
+        },
+        {
+          "name": "fee_account",
+          "docs": [
+            "The fee account to verify"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "order_id",
+          "type": "string"
+        },
+        {
+          "name": "expected_amount",
+          "type": "u64"
+        }
+      ],
+      "returns": "bool"
+    }
+  ]
+}
