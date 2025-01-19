@@ -28,7 +28,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased  bg-[#f3eee3] `}
       >
-        <AppLayout>{children}</AppLayout>
+        <AppLayout>
+          {/* <div className="mx-auto max-w-screen-xl px-1 md:px-4 sm:px-6 relative"> */}
+          {children}
+          {/* </div> */}
+        </AppLayout>
       </body>
     </html>
   );

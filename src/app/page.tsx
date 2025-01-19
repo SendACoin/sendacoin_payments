@@ -18,9 +18,11 @@ import {
   Zap,
 } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const { open } = useAppKit();
+  const router = useRouter();
 
   const features = [
     {
@@ -70,7 +72,7 @@ export default function Home() {
           />
 
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight max-w-3xl">
-            Accept Crypto Payments on Solana in Minutes
+            Accept Crypto Payments on Your website in Minutes
           </h1>
 
           <p className="text-xl text-gray-600 max-w-2xl">
@@ -82,7 +84,14 @@ export default function Home() {
             <Button size="lg" onClick={() => open()}>
               Get Started <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button size="lg" variant="outline">
+
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => {
+                router.push(`/order?amount=1`);
+              }}
+            >
               View Demo
             </Button>
           </div>
