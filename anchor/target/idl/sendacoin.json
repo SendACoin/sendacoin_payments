@@ -1,5 +1,5 @@
 {
-  "address": "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS",
+  "address": "F5jE4FMaARnKG79qLMtaGmhNHjb1LM9s2Bo3wH6QYZRK",
   "metadata": {
     "name": "sendacoin",
     "version": "0.1.0",
@@ -27,29 +27,75 @@
         },
         {
           "name": "payer_token_account",
-          "writable": true
+          "writable": true,
+          "optional": true
         },
         {
           "name": "merchant_token_account",
-          "writable": true
+          "writable": true,
+          "optional": true
         },
         {
           "name": "fee_account",
-          "writable": true
+          "writable": true,
+          "optional": true
         },
         {
           "name": "token_program",
+          "optional": true,
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "merchant_wallet",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "fee_wallet",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "payment_details",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "order_id"
+              }
+            ]
+          }
         }
       ],
       "args": [
         {
-          "name": "_order_id",
+          "name": "order_id",
           "type": "string"
         },
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "is_sol",
+          "type": "bool"
         }
       ]
     },
@@ -67,29 +113,141 @@
       ],
       "accounts": [
         {
-          "name": "merchant_token_account",
-          "docs": [
-            "The merchant's token account to verify"
-          ]
-        },
-        {
-          "name": "fee_account",
-          "docs": [
-            "The fee account to verify"
-          ]
+          "name": "payment_details",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "order_id"
+              }
+            ]
+          }
         }
       ],
       "args": [
         {
           "name": "order_id",
           "type": "string"
-        },
-        {
-          "name": "expected_amount",
-          "type": "u64"
         }
       ],
-      "returns": "bool"
+      "returns": {
+        "defined": {
+          "name": "PaymentResponse"
+        }
+      }
+    }
+  ],
+  "accounts": [
+    {
+      "name": "PaymentDetails",
+      "discriminator": [
+        206,
+        98,
+        33,
+        156,
+        142,
+        201,
+        81,
+        174
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "PaymentDetails",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "order_id",
+            "type": "string"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "payer",
+            "type": "pubkey"
+          },
+          {
+            "name": "merchant",
+            "type": "pubkey"
+          },
+          {
+            "name": "is_sol",
+            "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "token_mint",
+            "type": {
+              "option": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "PaymentResponse",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "order_id",
+            "type": "string"
+          },
+          {
+            "name": "total_amount",
+            "type": "u64"
+          },
+          {
+            "name": "merchant_amount",
+            "type": "u64"
+          },
+          {
+            "name": "fee_amount",
+            "type": "u64"
+          },
+          {
+            "name": "payer",
+            "type": "pubkey"
+          },
+          {
+            "name": "merchant",
+            "type": "pubkey"
+          },
+          {
+            "name": "is_sol",
+            "type": "bool"
+          },
+          {
+            "name": "token_mint",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
     }
   ]
 }

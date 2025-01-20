@@ -33,19 +33,61 @@ export type Sendacoin = {
         },
         {
           "name": "payerTokenAccount",
-          "writable": true
+          "writable": true,
+          "optional": true
         },
         {
           "name": "merchantTokenAccount",
-          "writable": true
+          "writable": true,
+          "optional": true
         },
         {
           "name": "feeAccount",
-          "writable": true
+          "writable": true,
+          "optional": true
         },
         {
           "name": "tokenProgram",
+          "optional": true,
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "merchantWallet",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "feeWallet",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "paymentDetails",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "orderId"
+              }
+            ]
+          }
         }
       ],
       "args": [
@@ -56,6 +98,10 @@ export type Sendacoin = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "isSol",
+          "type": "bool"
         }
       ]
     },
@@ -73,29 +119,141 @@ export type Sendacoin = {
       ],
       "accounts": [
         {
-          "name": "merchantTokenAccount",
-          "docs": [
-            "The merchant's token account to verify"
-          ]
-        },
-        {
-          "name": "feeAccount",
-          "docs": [
-            "The fee account to verify"
-          ]
+          "name": "paymentDetails",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "orderId"
+              }
+            ]
+          }
         }
       ],
       "args": [
         {
           "name": "orderId",
           "type": "string"
-        },
-        {
-          "name": "expectedAmount",
-          "type": "u64"
         }
       ],
-      "returns": "bool"
+      "returns": {
+        "defined": {
+          "name": "paymentResponse"
+        }
+      }
+    }
+  ],
+  "accounts": [
+    {
+      "name": "paymentDetails",
+      "discriminator": [
+        206,
+        98,
+        33,
+        156,
+        142,
+        201,
+        81,
+        174
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "paymentDetails",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "orderId",
+            "type": "string"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "payer",
+            "type": "pubkey"
+          },
+          {
+            "name": "merchant",
+            "type": "pubkey"
+          },
+          {
+            "name": "isSol",
+            "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "tokenMint",
+            "type": {
+              "option": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "paymentResponse",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "orderId",
+            "type": "string"
+          },
+          {
+            "name": "totalAmount",
+            "type": "u64"
+          },
+          {
+            "name": "merchantAmount",
+            "type": "u64"
+          },
+          {
+            "name": "feeAmount",
+            "type": "u64"
+          },
+          {
+            "name": "payer",
+            "type": "pubkey"
+          },
+          {
+            "name": "merchant",
+            "type": "pubkey"
+          },
+          {
+            "name": "isSol",
+            "type": "bool"
+          },
+          {
+            "name": "tokenMint",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
     }
   ]
 };

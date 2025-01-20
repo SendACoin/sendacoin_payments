@@ -34,7 +34,7 @@ pub mod sendacoin {
             // Handle native SOL transfer
             system_program::transfer(
                 CpiContext::new(
-                    ctx.accounts.system_program.as_ref().unwrap().to_account_info(),
+                    ctx.accounts.system_program.to_account_info(),
                     SystemTransfer {
                         from: ctx.accounts.payer.to_account_info(),
                         to: ctx.accounts.merchant_wallet.as_ref().unwrap().to_account_info(),
@@ -46,7 +46,7 @@ pub mod sendacoin {
             // Transfer SOL fee
             system_program::transfer(
                 CpiContext::new(
-                    ctx.accounts.system_program.as_ref().unwrap().to_account_info(),
+                    ctx.accounts.system_program.to_account_info(),
                     SystemTransfer {
                         from: ctx.accounts.payer.to_account_info(),
                         to: ctx.accounts.fee_wallet.as_ref().unwrap().to_account_info(),
@@ -119,13 +119,15 @@ pub struct ProcessOrder<'info> {
     pub merchant_wallet: Option<AccountInfo<'info>>,
     #[account(mut)]
     pub fee_wallet: Option<AccountInfo<'info>>,
-    pub system_program: Option<Program<'info, System>>,
+    
+    // Add required system_program field (non-optional since we're using init)
+    pub system_program: Program<'info, System>,
 
     // Payment details storage
     #[account(
         init,
         payer = payer,
-        space = 8 + 32 + 32 + 32 + 32 + 8 + 8 + 1 + 200, // Adjust space as needed
+        space = 8 + 32 + 32 + 32 + 32 + 8 + 8 + 1 + 200,
         seeds = [b"payment", order_id.as_bytes()],
         bump
     )]
