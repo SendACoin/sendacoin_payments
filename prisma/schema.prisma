@@ -1,137 +1,136 @@
-// This is your Prisma schema file
-datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+generator client {
+  provider = "prisma-client-js"
 }
 
-generator client {
-    provider = "prisma-client-js"
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Organization {
-    id             String               @id @default(cuid())
-    name           String
-    description    String?
-    logo           String?
-    website        String?
-    solana_address String?
-    evm_address    String?
-    createdAt      DateTime             @default(now())
-    updatedAt      DateTime             @updatedAt
-    members        OrganizationMember[] // Many-to-many relationship with users
-    orders         Order[]
-    invoices       Invoice[]
+  id             String               @id @default(cuid())
+  name           String
+  description    String?
+  logo           String?
+  website        String?
+  solana_address String?
+  evm_address    String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  invoices       Invoice[]
+  orders         Order[]
+  members        OrganizationMember[]
 }
 
 model User {
-    id             String               @id @default(cuid())
-    solana_address String?              @unique
-    evm_address    String?              @unique
-    organizations  OrganizationMember[] // Many-to-many relationship with organizations  
-    invoices       Invoice[]
-    createdAt      DateTime             @default(now())
-    updatedAt      DateTime             @updatedAt
+  id             String               @id @default(cuid())
+  solana_address String?              @unique
+  evm_address    String?              @unique
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  invoices       Invoice[]
+  organizations  OrganizationMember[]
 }
 
 model OrganizationMember {
-    id             String       @id @default(cuid())
-    role           UserRole     @default(MEMBER)
-    user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId         String
-    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    organizationId String
-    joinedAt       DateTime     @default(now())
-    updatedAt      DateTime     @updatedAt
+  id             String       @id @default(cuid())
+  role           UserRole     @default(MEMBER)
+  userId         String
+  organizationId String
+  joinedAt       DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([userId, organizationId])
-    @@index([userId])
-    @@index([organizationId])
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
 }
 
 model Order {
-    id             String       @id @default(cuid())
-    orderNumber    String       @unique
-    status         OrderStatus  @default(PENDING)
-    totalAmount    Decimal      @db.Decimal(10, 2)
-    currency       String       @default("USD")
-    organization   Organization @relation(fields: [organizationId], references: [id])
-    organizationId String
-    items          OrderItem[]
-    invoice        Invoice?
-    createdAt      DateTime     @default(now())
-    updatedAt      DateTime     @updatedAt
+  id             String       @id @default(cuid())
+  orderNumber    String       @unique
+  status         OrderStatus  @default(PENDING)
+  totalAmount    Decimal      @db.Decimal(10, 2)
+  currency       String       @default("USD")
+  organizationId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  invoice        Invoice?
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  items          OrderItem[]
 
-    @@index([organizationId])
+  @@index([organizationId])
 }
 
 model OrderItem {
-    id          String   @id @default(cuid())
-    order       Order    @relation(fields: [orderId], references: [id])
-    orderId     String
-    name        String
-    description String?
-    quantity    Int
-    unitPrice   Decimal  @db.Decimal(10, 2)
-    totalPrice  Decimal  @db.Decimal(10, 2)
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+  id          String   @id @default(cuid())
+  orderId     String
+  name        String
+  description String?
+  quantity    Int
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  totalPrice  Decimal  @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  order       Order    @relation(fields: [orderId], references: [id])
 
-    @@index([orderId])
+  @@index([orderId])
 }
 
 model Invoice {
-    id             String        @id @default(cuid())
-    invoiceNumber  String        @unique
-    status         InvoiceStatus @default(PENDING)
-    dueDate        DateTime
-    totalAmount    Decimal       @db.Decimal(10, 2)
-    currency       String        @default("USD")
-    organization   Organization  @relation(fields: [organizationId], references: [id])
-    organizationId String
-    user           User          @relation(fields: [userId], references: [id])
-    userId         String
-    order          Order?        @relation(fields: [orderId], references: [id])
-    orderId        String?       @unique
-    items          InvoiceItem[]
-    createdAt      DateTime      @default(now())
-    updatedAt      DateTime      @updatedAt
+  id             String        @id @default(cuid())
+  invoiceNumber  String        @unique
+  status         InvoiceStatus @default(PENDING)
+  dueDate        DateTime
+  totalAmount    Decimal       @db.Decimal(10, 2)
+  currency       String        @default("USD")
+  organizationId String
+  userId         String
+  orderId        String?       @unique
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  order          Order?        @relation(fields: [orderId], references: [id])
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  user           User          @relation(fields: [userId], references: [id])
+  items          InvoiceItem[]
 
-    @@index([organizationId])
-    @@index([userId])
-    @@index([orderId])
+  @@index([organizationId])
+  @@index([userId])
+  @@index([orderId])
 }
 
 model InvoiceItem {
-    id          String   @id @default(cuid())
-    invoice     Invoice  @relation(fields: [invoiceId], references: [id])
-    invoiceId   String
-    name        String
-    description String?
-    quantity    Int
-    unitPrice   Decimal  @db.Decimal(10, 2)
-    totalPrice  Decimal  @db.Decimal(10, 2)
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+  id          String   @id @default(cuid())
+  invoiceId   String
+  name        String
+  description String?
+  quantity    Int
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  totalPrice  Decimal  @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id])
 
-    @@index([invoiceId])
+  @@index([invoiceId])
 }
 
 enum UserRole {
-    OWNER
-    ADMIN
-    MEMBER
+  OWNER
+  ADMIN
+  MEMBER
 }
 
 enum OrderStatus {
-    PENDING
-    PROCESSING
-    COMPLETED
-    CANCELLED
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELLED
 }
 
 enum InvoiceStatus {
-    PENDING
-    PAID
-    OVERDUE
-    CANCELLED
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
 }

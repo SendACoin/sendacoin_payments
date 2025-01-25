@@ -49,16 +49,16 @@ const data = {
     },
     {
       title: "Invoices",
-      url: "#",
+      url: "/invoice",
       icon: Bot,
       items: [
         {
           title: "New Invoice",
-          url: "#",
+          url: "/invoice/create",
         },
         {
           title: "Manage Invoices",
-          url: "#",
+          url: "/invoice",
         },
       ],
     },

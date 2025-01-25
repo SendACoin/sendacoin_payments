@@ -1,3 +1,5 @@
+"use client";
+
 // Here we export some useful types and functions for interacting with the Anchor program.
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import { Cluster, PublicKey } from "@solana/web3.js";
@@ -15,13 +17,15 @@ export function getSendacoinProgram(
   provider: AnchorProvider,
   address?: PublicKey
 ) {
-  return new Program(
-    {
-      ...SendacoinIDL,
-      address: address ? address.toBase58() : SendacoinIDL.address,
-    } as Sendacoin,
-    provider
-  );
+  if (!provider) {
+    throw new Error(
+      "AnchorProvider is required to initialize the Sendacoin program"
+    );
+  }
+
+  const programId = address?.toBase58() || SendacoinIDL.address;
+
+  return new Program<Sendacoin>(SendacoinIDL as any, programId, provider);
 }
 
 // This is a helper function to get the program ID for the Sendacoin program depending on the cluster.

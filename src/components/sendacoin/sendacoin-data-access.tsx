@@ -1,22 +1,22 @@
 "use client";
 
+import { toast } from "@/hooks/use-toast";
 import { BN } from "@coral-xyz/anchor";
-import { getSendacoinProgram, getSendacoinProgramId } from "@project/anchor";
+import {
+  getSendacoinProgram,
+  getSendacoinProgramId,
+  type Sendacoin,
+} from "@project/anchor";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { Cluster, Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-
-import { toast } from "@/hooks/use-toast";
 import { useCluster } from "./cluster-data-access";
-import { useAnchorProvider } from "./solana-provider";
-
-const TOKEN_PROGRAM_ID = new PublicKey(
-  "F5jE4FMaARnKG79qLMtaGmhNHjb1LM9s2Bo3wH6QYZRK"
-);
+import { useAnchorProvider } from "./wallet-provider";
 
 interface SendacoinProgramHook {
-  program: ReturnType<typeof getSendacoinProgram>;
+  program: Sendacoin;
   programId: PublicKey;
   accounts: ReturnType<typeof useQuery>;
   getProgramAccount: ReturnType<typeof useQuery>;
@@ -35,18 +35,38 @@ export function useSendacoinProgram(): SendacoinProgramHook {
   const { connection } = useConnection();
   const { cluster } = useCluster();
   const provider = useAnchorProvider();
+
+  console.log("cluster", cluster);
+
   const programId = useMemo(
     () => getSendacoinProgramId(cluster.network as Cluster),
     [cluster]
   );
-  const program = useMemo(
-    () => getSendacoinProgram(provider, programId),
-    [provider, programId]
-  );
+
+  const program = useMemo(() => {
+    try {
+      const prog = getSendacoinProgram(provider, programId);
+      if (!prog || !prog.account) {
+        console.error("Failed to initialize Sendacoin program");
+        throw new Error("Program initialization failed");
+      }
+      return prog;
+    } catch (error) {
+      console.error("Error initializing Sendacoin program:", error);
+      throw error;
+    }
+  }, [provider, programId]);
 
   const accounts = useQuery({
     queryKey: ["sendacoin", "all", { cluster }],
-    queryFn: () => program.account.sendacoin.all(),
+    queryFn: async () => {
+      if (!program?.account?.paymentDetails) {
+        throw new Error("Payment details account not initialized");
+      }
+      return program.account.paymentDetails.all();
+    },
+    retry: false,
+    enabled: !!program?.account?.paymentDetails,
   });
 
   const getProgramAccount = useQuery({
@@ -65,11 +85,11 @@ export function useSendacoinProgram(): SendacoinProgramHook {
             payerTokenAccount: null,
             merchantTokenAccount: null,
             feeAccount: null,
-            tokenProgram: null,
             merchantWallet: null,
             feeWallet: null,
-            systemProgram: SystemProgram.programId,
             paymentDetails: keypair.publicKey,
+            systemProgramId: SystemProgram.programId,
+            tokenProgramId: TOKEN_PROGRAM_ID,
           })
           .signers([keypair])
           .rpc();
@@ -113,11 +133,11 @@ export function useSendacoinProgramAccount({
   feeUsdcAccount,
 }: SendacoinAccountProps) {
   const { cluster } = useCluster();
-  const { program, accounts } = useSendacoinProgram();
+  const { program } = useSendacoinProgram();
 
   const accountQuery = useQuery({
     queryKey: ["sendacoin", "fetch", { cluster, account: account.toString() }],
-    queryFn: () => program.account.sendacoin.fetch(account),
+    queryFn: () => program.account.paymentDetails.fetch(account),
   });
 
   const placeOrderMutation = useMutation({
@@ -135,10 +155,10 @@ export function useSendacoinProgramAccount({
             payerTokenAccount: payerUsdcAccount,
             merchantTokenAccount: merchantUsdcAccount,
             feeAccount: feeUsdcAccount,
-            tokenProgram: TOKEN_PROGRAM_ID,
             merchantWallet: null,
             feeWallet: null,
-            systemProgram: null,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
           })
           .rpc();
         return tx;

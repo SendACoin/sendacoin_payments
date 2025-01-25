@@ -1,7 +1,7 @@
 "use client";
 
 import { SolanaAdapter } from "@reown/appkit-adapter-solana/react";
-import { solana, solanaDevnet, solanaTestnet } from "@reown/appkit/networks";
+import { solanaDevnet, solanaTestnet } from "@reown/appkit/networks";
 import { createAppKit } from "@reown/appkit/react";
 import { WalletProvider } from "@solana/wallet-adapter-react";
 import {
@@ -28,12 +28,17 @@ const metadata = {
 // 3. Create modal
 createAppKit({
   adapters: [solanaWeb3JsAdapter],
-  networks: [solana, solanaTestnet, solanaDevnet],
+  networks: [solanaTestnet, solanaDevnet],
   metadata: metadata,
   projectId,
   features: {
     analytics: true, // Optional - defaults to your Cloud configuration
+    onramp: true,
+    email: true,
+    socials: ["google", "x", "github", "discord", "farcaster"],
+    emailShowWallets: true,
   },
+  themeMode: "light",
 });
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {

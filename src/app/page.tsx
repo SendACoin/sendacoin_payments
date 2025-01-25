@@ -1,12 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { useAppKit } from "@reown/appkit/react";
 import {
   ArrowRight,
@@ -19,6 +14,58 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+
+interface FeatureCardProps {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+  className?: string;
+  imagePosition?: "left" | "right";
+}
+
+function FeatureCard({
+  title,
+  description,
+  children,
+  className,
+  imagePosition = "left",
+}: FeatureCardProps) {
+  return (
+    <section
+      className={cn(
+        "relative overflow-hidden",
+        imagePosition === "left" && "bg-gradient-to-br ",
+        className
+      )}
+    >
+      <div className="container mx-auto px-4 py-20">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div
+            className={cn(
+              "flex justify-center lg:justify-start",
+              imagePosition === "right" ? "lg:order-2" : "lg:order-1"
+            )}
+          >
+            {children}
+          </div>
+          <div
+            className={cn(
+              "space-y-6",
+              imagePosition === "right" ? "lg:order-1" : "lg:order-2"
+            )}
+          >
+            <h2 className="text-[32px] font-semibold tracking-tight text-gray-900">
+              {title}
+            </h2>
+            <p className="text-lg leading-relaxed text-gray-600">
+              {description}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function Home() {
   const { open } = useAppKit();
@@ -98,15 +145,16 @@ export default function Home() {
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-16">
+        <div className="flex flex-col gap-8 mt-16 space-y-20">
           {features.map((feature, index) => (
-            <Card key={index} className="transition-colors shadow-none">
-              <CardHeader>
-                <feature.icon className="h-8 w-8 mb-4 text-primary" />
-                <CardTitle>{feature.title}</CardTitle>
-                <CardDescription>{feature.description}</CardDescription>
-              </CardHeader>
-            </Card>
+            <FeatureCard
+              key={index}
+              title={feature.title}
+              description={feature.description}
+              imagePosition={index % 2 === 0 ? "left" : "right"}
+            >
+              <feature.icon className="h-16 w-16 text-primary" />
+            </FeatureCard>
           ))}
         </div>
       </div>

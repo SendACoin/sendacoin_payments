@@ -1,5 +1,7 @@
 "use client";
 
+import { ClusterProvider } from "@/components/sendacoin/cluster-data-access";
+import SendacoinFeature from "@/components/sendacoin/sendacoin-feature";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,11 +34,15 @@ export default function OrderPage() {
       <img
         src="https://www.devzstudio.com/assets/images/logo.svg"
         className="pl-5"
+        alt="DevzStudio Logo"
       />
       <Card className="p-6 mt-10">
         <p>
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam,
         </p>
+        <ClusterProvider>
+          <SendacoinFeature />
+        </ClusterProvider>
 
         <div className="space-y-4 mt-6">
           <div>

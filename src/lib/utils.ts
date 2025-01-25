@@ -13,3 +13,7 @@ export function ellipsify(str = "", len = 4) {
   }
   return str;
 }
+
+export function formatDate(date: Date): string {
+  return new Date(date).toLocaleDateString();
+}

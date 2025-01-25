@@ -28,6 +28,7 @@ export const defaultClusters: Cluster[] = [
     name: "devnet",
     endpoint: clusterApiUrl("devnet"),
     network: ClusterNetwork.Devnet,
+    active: true,
   },
   { name: "local", endpoint: "http://localhost:8899" },
   {
@@ -109,7 +110,7 @@ export function useCluster() {
 }
 
 function getClusterUrlParam(cluster: Cluster): string {
-  let suffix = "";
+  let suffix = "devnet";
   switch (cluster.network) {
     case ClusterNetwork.Devnet:
       suffix = "devnet";
