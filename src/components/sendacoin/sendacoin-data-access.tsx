@@ -1,26 +1,70 @@
 "use client";
 
 import { toast } from "@/hooks/use-toast";
-import { BN } from "@coral-xyz/anchor";
+import { BN, Program } from "@coral-xyz/anchor";
 import {
   getSendacoinProgram,
   getSendacoinProgramId,
   type Sendacoin,
 } from "@project/anchor";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { useConnection } from "@solana/wallet-adapter-react";
-import { Cluster, Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { Cluster, PublicKey, SystemProgram } from "@solana/web3.js";
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+} from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useCluster } from "./cluster-data-access";
 import { useAnchorProvider } from "./wallet-provider";
 
+interface AdapterMethod<T, A> {
+  type: "query" | "mutation";
+  handler: (args: { program: Program<Sendacoin>; args?: A }) => Promise<T>;
+  onSuccess?: (data: T) => void;
+  onError?: (error: unknown) => void;
+}
+
+function createAdapter<T extends Record<string, AdapterMethod<any, any>>>({
+  name,
+  methods,
+}: {
+  name: string;
+  methods: T;
+}) {
+  return {
+    useQuery: (methodName: keyof T, { program, account, options = {} }: any) =>
+      useQuery({
+        queryKey: [name, methodName, account?.toString()],
+        queryFn: () => methods[methodName].handler({ program, account }),
+        ...options,
+      }),
+    useMutation: (methodName: keyof T, { program, args, onSuccess }: any) =>
+      useMutation({
+        mutationFn: (mutationArgs: any) =>
+          methods[methodName].handler({
+            program,
+            args: { ...args, ...mutationArgs },
+          }),
+        onSuccess: (data) => {
+          methods[methodName].onSuccess?.(data);
+          onSuccess?.(data);
+        },
+        onError: methods[methodName].onError,
+      }),
+  };
+}
+
+interface CreateOrderArgs {
+  title: string;
+  message: string;
+}
+
 interface SendacoinProgramHook {
-  program: Sendacoin;
+  program: Program<Sendacoin>;
   programId: PublicKey;
   accounts: ReturnType<typeof useQuery>;
-  getProgramAccount: ReturnType<typeof useQuery>;
-  initialize: ReturnType<typeof useMutation>;
+  createOrder: UseMutationResult<string, Error, CreateOrderArgs, unknown>;
 }
 
 interface SendacoinAccountProps {
@@ -32,87 +76,38 @@ interface SendacoinAccountProps {
 }
 
 export function useSendacoinProgram(): SendacoinProgramHook {
-  const { connection } = useConnection();
   const { cluster } = useCluster();
   const provider = useAnchorProvider();
-
-  console.log("cluster", cluster);
-
   const programId = useMemo(
     () => getSendacoinProgramId(cluster.network as Cluster),
     [cluster]
   );
-
-  const program = useMemo(() => {
-    try {
-      const prog = getSendacoinProgram(provider, programId);
-      if (!prog || !prog.account) {
-        console.error("Failed to initialize Sendacoin program");
-        throw new Error("Program initialization failed");
-      }
-      return prog;
-    } catch (error) {
-      console.error("Error initializing Sendacoin program:", error);
-      throw error;
-    }
-  }, [provider, programId]);
+  const program = getSendacoinProgram(provider);
 
   const accounts = useQuery({
     queryKey: ["sendacoin", "all", { cluster }],
-    queryFn: async () => {
-      if (!program?.account?.paymentDetails) {
-        throw new Error("Payment details account not initialized");
-      }
-      return program.account.paymentDetails.all();
-    },
-    retry: false,
-    enabled: !!program?.account?.paymentDetails,
+    queryFn: () => program.account.paymentDetails.all(),
   });
 
-  const getProgramAccount = useQuery({
-    queryKey: ["get-program-account", { cluster }],
-    queryFn: () => connection.getParsedAccountInfo(programId),
-  });
-
-  const initialize = useMutation({
-    mutationKey: ["sendacoin", "initialize", { cluster }],
-    mutationFn: async (keypair: Keypair) => {
-      try {
-        const signature = await program.methods
-          .processOrder("init", new BN(0), false)
-          .accounts({
-            payer: keypair.publicKey,
-            payerTokenAccount: null,
-            merchantTokenAccount: null,
-            feeAccount: null,
-            merchantWallet: null,
-            feeWallet: null,
-            paymentDetails: keypair.publicKey,
-            systemProgramId: SystemProgram.programId,
-            tokenProgramId: TOKEN_PROGRAM_ID,
-          })
-          .signers([keypair])
-          .rpc();
-        return signature;
-      } catch (error) {
-        toast({
-          title: "Initialization Failed",
-          description:
-            error instanceof Error ? error.message : "Unknown error occurred",
-          variant: "destructive",
-        });
-        throw error;
-      }
+  const createOrder = useMutation<string, Error, CreateOrderArgs>({
+    mutationKey: ["sendacoin", "process_order", { cluster }],
+    mutationFn: async ({ title, message }) => {
+      if (!program.methods) throw new Error("Program methods not initialized");
+      return program.methods.createJournalEntry(title, message).rpc();
     },
     onSuccess: (signature) => {
       toast({
-        title: "Success",
-        description: `Account initialized. Signature: ${signature.slice(
-          0,
-          8
-        )}...`,
+        title: "Order Created",
+        description: `Transaction signature: ${signature.slice(0, 8)}...`,
       });
-      return accounts.refetch();
+      accounts.refetch();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: `Failed to create journal entry: ${error.message}`,
+        variant: "destructive",
+      });
     },
   });
 
@@ -120,34 +115,36 @@ export function useSendacoinProgram(): SendacoinProgramHook {
     program,
     programId,
     accounts,
-    getProgramAccount,
-    initialize,
+    createOrder,
   };
 }
 
-export function useSendacoinProgramAccount({
-  account,
-  payerWallet,
-  payerUsdcAccount,
-  merchantUsdcAccount,
-  feeUsdcAccount,
-}: SendacoinAccountProps) {
-  const { cluster } = useCluster();
-  const { program } = useSendacoinProgram();
+const sendacoinAdapter = createAdapter({
+  name: "sendacoin",
+  methods: {
+    fetchPaymentDetails: {
+      type: "query",
+      handler: async ({ program, account }) => {
+        if (!program.account?.paymentDetails) {
+          throw new Error("Payment details account not initialized");
+        }
+        return program.account.paymentDetails.fetch(account);
+      },
+    },
+    processOrder: {
+      type: "mutation",
+      handler: async ({ program, args }) => {
+        const {
+          payerWallet,
+          payerUsdcAccount,
+          merchantUsdcAccount,
+          feeUsdcAccount,
+        } = args;
 
-  const accountQuery = useQuery({
-    queryKey: ["sendacoin", "fetch", { cluster, account: account.toString() }],
-    queryFn: () => program.account.paymentDetails.fetch(account),
-  });
+        if (!program.methods) {
+          throw new Error("Program methods not initialized");
+        }
 
-  const placeOrderMutation = useMutation({
-    mutationKey: [
-      "sendacoin",
-      "place-order",
-      { cluster, account: account.toString() },
-    ],
-    mutationFn: async () => {
-      try {
         const tx = await program.methods
           .processOrder("order123", new BN(100000000), false)
           .accounts({
@@ -161,8 +158,16 @@ export function useSendacoinProgramAccount({
             tokenProgram: TOKEN_PROGRAM_ID,
           })
           .rpc();
+
         return tx;
-      } catch (error) {
+      },
+      onSuccess: (tx) => {
+        toast({
+          title: "Order Processed",
+          description: `Transaction signature: ${tx.slice(0, 8)}...`,
+        });
+      },
+      onError: (error: unknown) => {
         toast({
           title: "Order Processing Failed",
           description:
@@ -170,19 +175,43 @@ export function useSendacoinProgramAccount({
           variant: "destructive",
         });
         throw error;
-      }
+      },
     },
-    onSuccess: (tx) => {
-      toast({
-        title: "Order Processed",
-        description: `Transaction signature: ${tx.slice(0, 8)}...`,
-      });
-      return accountQuery.refetch();
+  },
+});
+
+export function useSendacoinAccount({
+  account,
+  payerWallet,
+  payerUsdcAccount,
+  merchantUsdcAccount,
+  feeUsdcAccount,
+}: SendacoinAccountProps) {
+  const { program } = useSendacoinProgram();
+
+  const paymentDetails = sendacoinAdapter.useQuery("fetchPaymentDetails", {
+    program,
+    account,
+    options: {
+      enabled: !!program && !!account,
+    },
+  });
+
+  const processOrder = sendacoinAdapter.useMutation("processOrder", {
+    program,
+    onSuccess: () => {
+      paymentDetails.refetch();
+    },
+    args: {
+      payerWallet,
+      payerUsdcAccount,
+      merchantUsdcAccount,
+      feeUsdcAccount,
     },
   });
 
   return {
-    accountQuery,
-    placeOrderMutation,
+    paymentDetails,
+    processOrder,
   };
 }

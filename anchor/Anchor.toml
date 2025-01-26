@@ -12,7 +12,7 @@ sendacoin = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "devnet"
 wallet = "/Users/jijin/.config/solana/id.json"
 
 [scripts]

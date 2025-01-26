@@ -1,13 +1,23 @@
 "use client";
 
 import { SolanaAdapter } from "@reown/appkit-adapter-solana/react";
+import {
+  ConnectionProvider,
+  WalletProvider,
+} from "@solana/wallet-adapter-react";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 import { solanaDevnet, solanaTestnet } from "@reown/appkit/networks";
 import { createAppKit } from "@reown/appkit/react";
-import { WalletProvider } from "@solana/wallet-adapter-react";
 import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
+
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import { clusterApiUrl } from "@solana/web3.js";
+import { useMemo, useState } from "react";
 
 // 0. Set up Solana Adapter
 const solanaWeb3JsAdapter = new SolanaAdapter({
@@ -15,7 +25,7 @@ const solanaWeb3JsAdapter = new SolanaAdapter({
 });
 
 // 1. Get projectId from https://cloud.reown.com
-const projectId = "YOUR_PROJECT_ID";
+const projectId = "778c1f5bc8ddd19f7cf85f28db71943f";
 
 // 2. Create a metadata object - optional
 const metadata = {
@@ -42,10 +52,18 @@ createAppKit({
 });
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
+  const [client] = useState(new QueryClient());
+
+  const network = WalletAdapterNetwork.Devnet;
+  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
+
   return (
-    <WalletProvider wallets={solanaWeb3JsAdapter.wallets || []}>
-      {children}
-    </WalletProvider>
+    <QueryClientProvider client={client}>
+      <ConnectionProvider endpoint={endpoint}>
+        <WalletProvider wallets={wallets}>{children}</WalletProvider>
+      </ConnectionProvider>
+    </QueryClientProvider>
   );
 };
 

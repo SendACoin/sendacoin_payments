@@ -10,31 +10,22 @@ import type { Sendacoin } from "../target/types/sendacoin";
 export { Sendacoin, SendacoinIDL };
 
 // The programId is imported from the program IDL.
-export const SENDACOIN_PROGRAM_ID = new PublicKey(SendacoinIDL.address);
+export const SENDACOIN_PROGRAM_ID = new PublicKey(
+  "F5jE4FMaARnKG79qLMtaGmhNHjb1LM9s2Bo3wH6QYZRK"
+);
 
 // This is a helper function to get the Sendacoin Anchor program.
 export function getSendacoinProgram(
   provider: AnchorProvider,
   address?: PublicKey
 ) {
-  if (!provider) {
-    throw new Error(
-      "AnchorProvider is required to initialize the Sendacoin program"
-    );
-  }
-
-  const programId = address?.toBase58() || SendacoinIDL.address;
-
-  return new Program<Sendacoin>(SendacoinIDL as any, programId, provider);
+  return new Program(SendacoinIDL as any, provider);
 }
 
-// This is a helper function to get the program ID for the Sendacoin program depending on the cluster.
 export function getSendacoinProgramId(cluster: Cluster) {
   switch (cluster) {
     case "devnet":
     case "testnet":
-      // This is the program ID for the Sendacoin program on devnet and testnet.
-      return new PublicKey("coUnmi3oBUtwtd9fjeAvSsJssXh5A5xyPbhpewyzRVF");
     case "mainnet-beta":
     default:
       return SENDACOIN_PROGRAM_ID;

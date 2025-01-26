@@ -2,7 +2,6 @@
 
 import { ClusterProvider } from "@/components/sendacoin/cluster-data-access";
 import SendacoinFeature from "@/components/sendacoin/sendacoin-feature";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "next/navigation";
@@ -40,9 +39,6 @@ export default function OrderPage() {
         <p>
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam,
         </p>
-        <ClusterProvider>
-          <SendacoinFeature />
-        </ClusterProvider>
 
         <div className="space-y-4 mt-6">
           <div>
@@ -85,13 +81,9 @@ export default function OrderPage() {
             />
           </div> */}
 
-          <Button
-            onClick={handleCreateOrder}
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading ? "Processing..." : "Pay"}
-          </Button>
+          <ClusterProvider>
+            <SendacoinFeature />
+          </ClusterProvider>
         </div>
       </Card>
     </div>
