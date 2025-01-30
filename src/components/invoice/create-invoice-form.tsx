@@ -13,7 +13,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
+import router from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -42,6 +44,7 @@ interface CreateInvoiceFormProps {
 export function CreateInvoiceForm({ clientId }: CreateInvoiceFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<InvoiceFormValues>({
+    // @ts-ignore
     resolver: zodResolver(invoiceFormSchema) as any, // Type assertion to fix incompatible types
     defaultValues: {
       invoiceNumber: "",
@@ -57,12 +60,24 @@ export function CreateInvoiceForm({ clientId }: CreateInvoiceFormProps) {
     try {
       await createInvoice({
         clientId,
+        invoiceNumber: data.invoiceNumber,
         dueDate: data.dueDate,
         items: data.lineItems,
         notes: data.notes || "",
       });
+
+      toast({
+        title: "Invoice created successfully",
+        description: "Share the invoice link with your client",
+      });
+      router.push(`/client/${clientId}/invoice`);
     } catch (error) {
       console.error("Failed to create invoice:", error);
+      toast({
+        title: "Failed to create invoice",
+        description: "Please try again later",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

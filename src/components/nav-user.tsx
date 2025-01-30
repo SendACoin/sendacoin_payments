@@ -9,9 +9,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
-import { useAppKit } from "@reown/appkit/react";
+import { shortenAddress } from "@/lib/utils";
+import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
 
 export function NavUser({
   user,
@@ -22,7 +22,7 @@ export function NavUser({
     avatar: string;
   };
 }) {
-  const { isMobile } = useSidebar();
+  const { address } = useAppKitAccount();
   const { open } = useAppKit();
 
   return (
@@ -39,11 +39,16 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarImage
+                  src={`//upload.wikimedia.org/wikipedia/en/thumb/b/b9/Solana_logo.png/252px-Solana_logo.png`}
+                  alt={user.name}
+                />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
+                <span className="truncate font-semibold">
+                  {shortenAddress(address ?? "")}
+                </span>
               </div>
             </SidebarMenuButton>
           </DropdownMenuTrigger>

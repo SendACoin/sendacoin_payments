@@ -2,10 +2,15 @@ import { format } from "date-fns";
 import { prisma } from "../../../../../lib/prisma";
 import InvoicesPage from "./invoices-page";
 
-async function ViewInvoices({ params }: { params: { clientId: string } }) {
+async function ViewInvoices({
+  params,
+}: {
+  params: Promise<{ clientId: string }>;
+}) {
+  const clientId = (await params).clientId;
   const invoices = await prisma.invoice.findMany({
     where: {
-      organizationId: params.clientId,
+      organizationId: clientId,
     },
     orderBy: {
       createdAt: "desc",
@@ -16,19 +21,22 @@ async function ViewInvoices({ params }: { params: { clientId: string } }) {
       totalAmount: true,
       status: true,
       createdAt: true,
+
       dueDate: true,
     },
   });
 
   const formattedInvoices = invoices.map((invoice) => ({
     ...invoice,
-    formattedCreatedAt: format(invoice.createdAt, "MMM dd, yyyy"),
+    formattedCreatedAt: format(
+      invoice?.createdAt ?? new Date(),
+      "MMM dd, yyyy"
+    ),
     formattedDueDate: format(invoice.dueDate, "MMM dd, yyyy"),
   }));
 
-  return (
-    <InvoicesPage invoices={formattedInvoices} clientId={params.clientId} />
-  );
+  // @ts-ignore
+  return <InvoicesPage invoices={formattedInvoices} clientId={clientId} />;
 }
 
 export default ViewInvoices;

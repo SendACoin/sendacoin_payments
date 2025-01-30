@@ -2,19 +2,19 @@ import { CreateInvoiceForm } from "@/components/invoice/create-invoice-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
 
-interface CreateInvoicePageProps {
-  params: {
-    clientId: string;
-  };
-}
+export default async function CreateInvoicePage({
+  params,
+}: {
+  params: Promise<{ clientId: string }>;
+}) {
+  const clientId = (await params).clientId;
 
-export default function CreateInvoicePage({ params }: CreateInvoicePageProps) {
   return (
     <div className="container max-w-4xl py-8">
       <div className="px-6">
         <h1 className="text-3xl font-bold mb-8">Create New Invoice</h1>
         <Suspense fallback={<CreateInvoiceFormSkeleton />}>
-          <CreateInvoiceForm clientId={params.clientId} />
+          <CreateInvoiceForm clientId={clientId} />
         </Suspense>
       </div>
     </div>

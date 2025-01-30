@@ -83,13 +83,14 @@ model Invoice {
   invoiceNumber  String        @unique
   status         InvoiceStatus @default(PENDING)
   dueDate        DateTime
-  totalAmount    Decimal       @db.Decimal(10, 2)
-  currency       String        @default("USD")
+  totalAmount    Decimal?      @default(0) @db.Decimal(10, 2)
+  currency       String?       @default("USD")
   organizationId String
   userId         String
   orderId        String?       @unique
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  createdAt      DateTime?     @default(now())
+  updatedAt      DateTime?     @default(now()) @updatedAt
+  notes          String?
   order          Order?        @relation(fields: [orderId], references: [id])
   organization   Organization  @relation(fields: [organizationId], references: [id])
   user           User          @relation(fields: [userId], references: [id])

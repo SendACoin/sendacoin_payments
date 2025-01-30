@@ -2,11 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useAppKit } from "@reown/appkit/react";
+import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
 import {
   ArrowRight,
   Bell,
-  Link,
   Percent,
   Receipt,
   ShoppingCart,
@@ -14,6 +13,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 interface FeatureCardProps {
   title: string;
@@ -70,6 +70,13 @@ function FeatureCard({
 export default function Home() {
   const { open } = useAppKit();
   const router = useRouter();
+  const { address, isConnected } = useAppKitAccount();
+
+  useEffect(() => {
+    if (isConnected && address) {
+      router.push(`/client/550e8400-e29b-41d4-a716-446655440000`);
+    }
+  }, [isConnected, address, router]);
 
   const features = [
     {
@@ -91,11 +98,6 @@ export default function Home() {
       title: "Invoice Generation",
       description: "Create and manage professional invoices",
       icon: Receipt,
-    },
-    {
-      title: "Payment Links",
-      description: "Share payment links with your customers",
-      icon: Link,
     },
     {
       title: "Instant Settlement",
@@ -123,20 +125,20 @@ export default function Home() {
           </h1>
 
           <p className="text-xl text-gray-600 max-w-2xl">
-            Seamlessly integrate USDC payments into your business with our
+            Seamlessly integrate SOL payments into your business with our
             simple-to-use platform
           </p>
 
           <div className="flex gap-4 mt-4">
             <Button size="lg" onClick={() => open()}>
-              Get Started <ArrowRight className="ml-2 h-4 w-4" />
+              Connect Wallet <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
 
             <Button
               size="lg"
               variant="outline"
               onClick={() => {
-                router.push(`/order?amount=1`);
+                router.push(`/example`);
               }}
             >
               View Demo

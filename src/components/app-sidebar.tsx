@@ -3,6 +3,7 @@
 import {
   BookOpen,
   Bot,
+  CircleGauge,
   Command,
   LifeBuoy,
   Send,
@@ -32,44 +33,26 @@ const data = {
   },
   navMain: [
     {
+      title: "Dashboard",
+      url: "/",
+      icon: CircleGauge,
+      isActive: true,
+    },
+    {
       title: "Orders",
-      url: "#",
+      url: "/orders",
       icon: SquareTerminal,
       isActive: true,
-      items: [
-        {
-          title: "Completed",
-          url: "#",
-        },
-        {
-          title: "Pending",
-          url: "#",
-        },
-      ],
     },
     {
       title: "Invoices",
       url: "/invoice",
       icon: Bot,
-      items: [
-        {
-          title: "New Invoice",
-          url: "/invoice/create",
-        },
-        {
-          title: "Manage Invoices",
-          url: "/invoice",
-        },
-      ],
     },
-    {
-      title: "Payment Links",
-      url: "#",
-      icon: BookOpen,
-    },
+
     {
       title: "Settings",
-      url: "#",
+      url: "/settings",
       icon: Settings2,
     },
   ],

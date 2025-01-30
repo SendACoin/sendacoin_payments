@@ -17,3 +17,13 @@ export function ellipsify(str = "", len = 4) {
 export function formatDate(date: Date): string {
   return new Date(date).toLocaleDateString();
 }
+
+export const shortenAddress = (address: string): null | string => {
+  if (!address) {
+    return null;
+  }
+  const parsed = address;
+  return `${parsed.substring(0, 4 + 2)}...${parsed.substring(
+    address.length - 4
+  )}`;
+};

@@ -4,23 +4,24 @@ import { getInvoiceById } from "@/lib/db/invoice";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-interface InvoicePageProps {
-  params: {
-    invoiceId: string;
-  };
-}
+export default async function InvoicePage({
+  params,
+}: {
+  params: Promise<{ invoiceId: string }>;
+}) {
+  const invoiceId = (await params).invoiceId;
 
-export default async function InvoicePage({ params }: InvoicePageProps) {
-  const invoice = await getInvoiceById(params.invoiceId);
+  const invoice = await getInvoiceById(invoiceId);
 
   if (!invoice) {
     notFound();
   }
 
   return (
-    <div className="container max-w-4xl py-8">
+    <div className="container max-w-4xl py-8 mx-auto">
       <Suspense fallback={<InvoiceDetailsSkeleton />}>
-        <InvoiceDetails invoiceId={params.invoiceId} />
+        {/* @ts-ignore */}
+        <InvoiceDetails invoice={invoice} />
       </Suspense>
     </div>
   );

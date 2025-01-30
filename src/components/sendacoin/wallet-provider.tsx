@@ -15,7 +15,7 @@ export function useAnchorProvider() {
 
   const wallet = {
     address: address,
-    signTransaction: async (data: any) => {
+    signTransaction: async () => {
       const latestBlockhash = await connection?.getLatestBlockhash();
 
       // create the transaction
