@@ -63,7 +63,7 @@ export function DataTable<TData extends { id: string }, TValue>({
             variant={"ghost"}
             onClick={(e) => {
               e.stopPropagation();
-              copyToClipboard(`/invoice/${id}`);
+              copyToClipboard(`https://sendacoinv2.vercel.app/invoice/${id}`);
             }}
           >
             Share Invoice Link <Copy className="h-4 w-4" />
