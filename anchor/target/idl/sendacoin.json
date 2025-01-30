@@ -9,16 +9,7 @@
   "instructions": [
     {
       "name": "process_order",
-      "discriminator": [
-        126,
-        54,
-        252,
-        181,
-        254,
-        163,
-        107,
-        165
-      ],
+      "discriminator": [126, 54, 252, 181, 254, 163, 107, 165],
       "accounts": [
         {
           "name": "payer",
@@ -66,15 +57,7 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [
-                  112,
-                  97,
-                  121,
-                  109,
-                  101,
-                  110,
-                  116
-                ]
+                "value": [112, 97, 121, 109, 101, 110, 116]
               },
               {
                 "kind": "arg",
@@ -101,16 +84,7 @@
     },
     {
       "name": "verify_payment",
-      "discriminator": [
-        70,
-        155,
-        98,
-        44,
-        176,
-        110,
-        74,
-        169
-      ],
+      "discriminator": [70, 155, 98, 44, 176, 110, 74, 169],
       "accounts": [
         {
           "name": "payment_details",
@@ -118,15 +92,7 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [
-                  112,
-                  97,
-                  121,
-                  109,
-                  101,
-                  110,
-                  116
-                ]
+                "value": [112, 97, 121, 109, 101, 110, 116]
               },
               {
                 "kind": "arg",
@@ -152,16 +118,7 @@
   "accounts": [
     {
       "name": "PaymentDetails",
-      "discriminator": [
-        206,
-        98,
-        33,
-        156,
-        142,
-        201,
-        81,
-        174
-      ]
+      "discriminator": [206, 98, 33, 156, 142, 201, 81, 174]
     }
   ],
   "types": [

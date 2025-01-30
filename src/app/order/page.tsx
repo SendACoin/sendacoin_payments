@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useGetBalance } from "@/components/sendacoin/account-data-access";
@@ -22,7 +21,9 @@ interface OrderData {
 const ShowBalance = ({ address }: { address: string }) => {
   const balance = useGetBalance({ address: new PublicKey(address) });
   return (
-    <p className="font-bold">{balance.data ? String(balance.data) : "0"} SOL</p>
+    <p className="font-bold">
+      {balance.data ? String(balance.data / 1000000000) : "0"} SOL
+    </p>
   );
 };
 
@@ -45,7 +46,7 @@ export default function OrderPage() {
 
   return (
     <div className="container mx-auto p-4 max-w-2xl mt-20">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-5">
         <img
           src="https://www.devzstudio.com/assets/images/logo.svg"
           className="pl-5"
@@ -67,7 +68,7 @@ export default function OrderPage() {
         <Alert variant="default" className="mb-6 bg-white mt-10">
           <AlertCircle className="h-4 w-4 mt-1" />
           <AlertDescription className="flex items-center justify-between">
-            <span>Your balance is low </span>
+            <span>Low balance? fund your wallet </span>
             <Button onClick={() => open()}>Fund Wallet</Button>
           </AlertDescription>
         </Alert>

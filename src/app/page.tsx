@@ -3,14 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
-import {
-  ArrowRight,
-  Bell,
-  Percent,
-  Receipt,
-  ShoppingCart,
-  Zap,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -57,7 +50,7 @@ function FeatureCard({
             <h2 className="text-[32px] font-semibold tracking-tight text-gray-900">
               {title}
             </h2>
-            <p className="text-lg leading-relaxed text-gray-600">
+            <p className="text-lg leading-relaxed text-gray-600 max-w-[500px]">
               {description}
             </p>
           </div>
@@ -81,28 +74,33 @@ export default function Home() {
   const features = [
     {
       title: "1% Transaction Fee",
-      description: "Competitive pricing with just 1% fee per transaction",
-      icon: Percent,
+      description:
+        "Experience cost-effective payment processing with our competitive 1% transaction fee. We keep our pricing transparent and straightforward so you can focus on growing your business.",
+      icon: "/1.png",
     },
     {
       title: "Instant Notifications",
-      description: "Real-time payment notifications for seamless operations",
-      icon: Bell,
+      description:
+        "Stay informed with real-time payment notifications that keep you updated on every transaction. Our instant alert system ensures you never miss a payment and can manage your business operations efficiently.",
+      icon: "/2.png",
     },
     {
       title: "Digital Products",
-      description: "Easily sell digital products and services",
-      icon: ShoppingCart,
+      description:
+        "Expand your online business by selling digital products and services with ease. Our platform provides secure delivery and automated fulfillment, making it simple to manage your digital inventory.",
+      icon: "/3.png",
     },
     {
       title: "Invoice Generation",
-      description: "Create and manage professional invoices",
-      icon: Receipt,
+      description:
+        "Create professional, customizable invoices in seconds with our intuitive invoice generation system. Keep track of all your transactions and maintain organized financial records effortlessly.",
+      icon: "/4.png",
     },
     {
       title: "Instant Settlement",
-      description: "Receive payments instantly on Solana",
-      icon: Zap,
+      description:
+        "Experience the power of instant payments with Solana blockchain technology. Your funds are settled immediately after transaction confirmation, providing you with quick access to your earnings.",
+      icon: "/5.png",
     },
   ];
 
@@ -155,7 +153,7 @@ export default function Home() {
               description={feature.description}
               imagePosition={index % 2 === 0 ? "left" : "right"}
             >
-              <feature.icon className="h-16 w-16 text-primary" />
+              <img src={feature.icon} className="max-w-[500px]" />
             </FeatureCard>
           ))}
         </div>
