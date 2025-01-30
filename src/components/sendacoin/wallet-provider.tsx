@@ -1,3 +1,4 @@
+import { toast } from "@/hooks/use-toast";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import type { Provider } from "@reown/appkit-adapter-solana/react";
 import {
@@ -16,7 +17,10 @@ export function useAnchorProvider() {
   const wallet = {
     address: address,
     signTransaction: async () => {
+      console.log("Process Payment!");
+
       const latestBlockhash = await connection?.getLatestBlockhash();
+      console.log("Process Payment2!");
 
       // create the transaction
       const transaction = new Transaction({
@@ -34,6 +38,7 @@ export function useAnchorProvider() {
           lamports: 1000,
         })
       );
+      console.log("Process Payment3!");
 
       // raise the modal
       const signature = await walletProvider.sendTransaction(
@@ -43,6 +48,13 @@ export function useAnchorProvider() {
 
       // print the Transaction Signature
       console.log(signature);
+
+      toast({
+        title: "Transaction",
+        description: `Transaction: ${signature}`,
+      });
+
+      window.location.href = `/order/${signature}`;
 
       return transaction;
     },

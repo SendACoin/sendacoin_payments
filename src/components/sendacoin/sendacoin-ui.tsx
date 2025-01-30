@@ -32,7 +32,9 @@ export function SendacoinCard({
           <div className="card-actions justify-around">
             <Button
               className="btn btn-xs lg:btn-md btn-outline w-full"
-              onClick={() => processOrder.mutateAsync()}
+              onClick={() => {
+                const response = processOrder.mutateAsync();
+              }}
               disabled={processOrder.isPending}
             >
               Pay
